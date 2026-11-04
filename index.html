@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web Ultra Platforma</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        tg: {
+                            blue: '#24A1DE',
+                            darkBlue: '#0088cc',
+                            hover: '#1c88be',
+                            cyan: '#00d2ff',
+                            bgDark: '#0b111e',
+                            panelDark: '#151d2a',
+                            chatDark: '#0f1724',
+                            msgOut: '#2b5278',
+                            msgIn: '#182533',
+                            inputDark: '#1e2c3a',
+                            borderDark: '#233143',
+                            gold: '#fbbf24'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Modern Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.45);
+        }
+        
+        /* Glassmorphism subtle effects */
+        .glass-panel {
+            background: rgba(21, 29, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.99); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Telegram Background Pattern */
+        .bg-tg-pattern {
+            background-color: #0b111e;
+            background-image: radial-gradient(#1e2c3a 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+        .light .bg-tg-pattern {
+            background-color: #eef2f6;
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+
+        .strength-bar {
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* Admin Shiny Glow */
+        .admin-badge-glow {
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-tg-pattern text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-300 light:text-slate-800 antialiased selection:bg-tg-blue selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full p-3 sm:p-4 flex justify-between items-center max-w-7xl mx-auto z-20">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-tg-darkBlue via-tg-blue to-tg-cyan flex items-center justify-center shadow-lg shadow-tg-blue/30 text-white font-bold">
+                <i class="fa-paper-plane text-lg"></i>
+            </div>
+            <div>
+                <span class="font-extrabold text-xl tracking-tight text-slate-800 dark:text-white flex items-center gap-1.5">
+                    Telegram <span class="text-tg-blue">Web Pro</span>
+                </span>
+                <span class="text-[10px] text-slate-400 block font-medium">Interaktiv Aloqa Platformasi</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button id="themeToggleBtn" title="Mavzuni almashtirish" class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition flex items-center justify-center shadow-sm">
+                <i id="themeIcon" class="fas"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Global Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 max-w-sm w-full p-4 rounded-2xl shadow-2xl flex items-center space-x-3 bg-slate-900/90 border border-slate-700/80 text-white backdrop-blur-md">
+        <div id="toastIcon" class="p-2.5 rounded-xl text-lg flex items-center justify-center"></div>
+        <div class="flex-1 text-xs sm:text-sm font-medium" id="toastMessage">Xabarnoma</div>
+        <button onclick="hideToast()" class="text-slate-400 hover:text-white p-1">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-1 flex items-center justify-center p-2 sm:p-4 max-w-7xl w-full mx-auto my-auto">
+
+        <!-- ================= AUTHENTICATION CONTAINER ================= -->
+        <div id="authContainer" class="w-full max-w-md bg-white dark:bg-tg-panelDark border border-slate-200 dark:border-tg-borderDark rounded-3xl shadow-2xl p-6 sm:p-8 transition-all duration-300 fade-in relative overflow-hidden">
+            
+            <!-- Tab Buttons -->
+            <div id="tabContainer" class="flex bg-slate-100 dark:bg-slate-900/80 p-1.5 rounded-2xl mb-6 border border-slate-200 dark:border-slate-800">
+                <button id="tabLoginBtn" onclick="switchAuthMode('login')" class="flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition duration-200 bg-white dark:bg-tg-panelDark text-tg-blue shadow-md">
+                    Kirish
+                </button>
+                <button id="tabRegisterBtn" onclick="switchAuthMode('register')" class="flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
+                    Ro'yxatdan O'tish
+                </button>
+            </div>
+
+            <!-- Header Title -->
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-3 bg-tg-blue/10 dark:bg-tg-blue/20 rounded-2xl flex items-center justify-center text-tg-blue text-3xl shadow-inner">
+                    <i id="headerIcon" class="fas fa-user-shield"></i>
+                </div>
+                <h2 id="authTitle" class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Tizimga Kirish</h2>
+                <p id="authSubtitle" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Telegram akkauntingizga email orqali kiring</p>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 fade-in">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Email Manzil</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="email" id="loginEmail" required placeholder="email@domain.com"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-blue text-slate-800 dark:text-white text-sm placeholder-slate-400 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Parol</label>
+                        <button type="button" onclick="switchAuthMode('forgot')" class="text-xs font-semibold text-tg-blue hover:underline">Parolni unutdingizmi?</button>
+                    </div>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="password" id="loginPassword" required placeholder="••••••••"
+                            class="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-blue text-slate-800 dark:text-white text-sm placeholder-slate-400 transition">
+                        <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                            <i class="fas fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-blue-50 dark:bg-tg-blue/10 rounded-xl border border-blue-200 dark:border-tg-blue/20 text-xs text-slate-600 dark:text-slate-300 flex items-start space-x-2">
+                    <i class="fas fa-shield-alt text-tg-blue mt-0.5"></i>
+                    <span>Eslatma: <strong class="text-tg-blue">jumaqulovbehruz831@gmail.com</strong> avtomatik ADMIN statusini oladi.</span>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-tg-darkBlue to-tg-blue hover:opacity-95 text-white font-bold rounded-xl shadow-lg shadow-tg-blue/30 transition duration-200 text-sm flex items-center justify-center space-x-2">
+                    <span>Kirish</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden fade-in">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Ism va Familiya</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="regName" required placeholder="Behruz Jumaqulov"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-blue text-slate-800 dark:text-white text-sm placeholder-slate-400 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Email Manzil</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="email" id="regEmail" required placeholder="name@example.com"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-blue text-slate-800 dark:text-white text-sm placeholder-slate-400 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Parol Yaratish</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="password" id="regPassword" required placeholder="Kamida 6 ta belgi" oninput="checkPasswordStrength(this.value)"
+                            class="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-blue text-slate-800 dark:text-white text-sm placeholder-slate-400 transition">
+                        <button type="button" onclick="togglePasswordVisibility('regPassword', this)" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                            <i class="fas fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <div class="flex justify-between items-center text-[11px] mb-1">
+                            <span class="text-slate-400">Mustahkamlik:</span>
+                            <span id="strengthText" class="font-semibold text-slate-400">---</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div id="strengthBar" class="strength-bar h-full w-0 bg-red-500"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-tg-darkBlue to-tg-blue hover:opacity-95 text-white font-bold rounded-xl shadow-lg shadow-tg-blue/30 transition duration-200 text-sm flex items-center justify-center space-x-2 mt-2">
+                    <span>Ro'yxatdan O'tish</span>
+                    <i class="fas fa-user-plus text-xs"></i>
+                </button>
+            </form>
+
+            <!-- FORGOT FORM -->
+            <form id="forgotForm" onsubmit="handleForgot(event)" class="space-y-4 hidden fade-in">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Email Manzil</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="email" id="forgotEmail" required placeholder="name@example.com"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-blue text-slate-800 dark:text-white text-sm placeholder-slate-400 transition">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-tg-blue hover:bg-tg-hover text-white font-bold rounded-xl shadow-lg shadow-tg-blue/30 transition duration-200 text-sm flex items-center justify-center space-x-2">
+                    <span>Tiklash Kodini Yuborish</span>
+                    <i class="fas fa-paper-plane text-xs"></i>
+                </button>
+
+                <div class="text-center pt-2">
+                    <button type="button" onclick="switchAuthMode('login')" class="text-xs font-semibold text-slate-400 hover:text-tg-blue transition">
+                        <i class="fas fa-arrow-left mr-1"></i> Kirish oynasiga qaytish
+                    </button>
+                </div>
+            </form>
+        </div>
+
+
+        <!-- ================= TELEGRAM MESSENGER DASHBOARD ================= -->
+        <div id="dashboard" class="w-full bg-white dark:bg-tg-panelDark border border-slate-200 dark:border-tg-borderDark rounded-3xl shadow-2xl overflow-hidden hidden grid grid-cols-1 md:grid-cols-12 h-[85vh] min-h-[600px] fade-in">
+            
+            <!-- Left Sidebar -->
+            <div class="md:col-span-4 border-r border-slate-200 dark:border-tg-borderDark flex flex-col bg-slate-50 dark:bg-tg-panelDark/80">
+                
+                <!-- Active User Profile Bar -->
+                <div class="p-3.5 sm:p-4 border-b border-slate-200 dark:border-tg-borderDark flex items-center justify-between bg-white dark:bg-tg-panelDark">
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="openProfileModal()">
+                        <div class="relative">
+                            <img id="userAvatarImg" src="https://api.dicebear.com/7.x/bottts/svg?seed=Admin" class="w-11 h-11 rounded-2xl bg-slate-200 dark:bg-slate-700 object-cover border-2 border-tg-blue shadow-sm">
+                            <span id="adminCrownBadge" class="absolute -top-1.5 -right-1.5 text-tg-gold text-xs filter drop-shadow hidden">
+                                <i class="fas fa-crown"></i>
+                            </span>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="flex items-center space-x-1.5">
+                                <h3 id="displayUserName" class="font-bold text-sm text-slate-800 dark:text-white truncate">Foydalanuvchi</h3>
+                                <span id="isAdminBadge" class="hidden px-1.5 py-0.5 rounded text-[10px] font-black tracking-wide bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 uppercase shadow-sm">ADMIN</span>
+                            </div>
+                            <p id="displayUserBio" class="text-[11px] text-emerald-500 font-medium truncate">Onlayn</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-1">
+                        <!-- Admin Panel Button (If Admin) -->
+                        <button id="adminPanelBtn" onclick="openAdminModal()" title="Admin Boshqaruv Paneli" class="hidden p-2 rounded-xl text-tg-gold hover:bg-tg-gold/10 transition">
+                            <i class="fas fa-user-gear text-base"></i>
+                        </button>
+                        <!-- Profile Settings -->
+                        <button onclick="openProfileModal()" title="Profil Tahrirlash" class="p-2 rounded-xl text-slate-400 hover:text-tg-blue hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <i class="fas fa-cog text-base"></i>
+                        </button>
+                        <!-- Logout -->
+                        <button onclick="handleLogout()" title="Chiqish" class="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition">
+                            <i class="fas fa-right-from-bracket text-base"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Search -->
+                <div class="p-3">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="chatSearchInput" onkeyup="filterChats()" placeholder="Qidirish va filter..." class="w-full pl-9 pr-3 py-2 bg-slate-200/80 dark:bg-tg-inputDark border border-transparent dark:border-tg-borderDark rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-tg-blue">
+                    </div>
+                </div>
+
+                <!-- Chat Tabs -->
+                <div class="flex px-3 border-b border-slate-200 dark:border-tg-borderDark/60 text-xs font-semibold text-slate-400">
+                    <button class="flex-1 py-2 text-tg-blue border-b-2 border-tg-blue">Barchasi</button>
+                    <button class="flex-1 py-2 hover:text-slate-300">Shaxsiy</button>
+                    <button class="flex-1 py-2 hover:text-slate-300">Guruhlar</button>
+                </div>
+
+                <!-- Chats List Stream -->
+                <div id="chatListStream" class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-tg-borderDark/40">
+                    
+                    <!-- Main Global Chat -->
+                    <div class="p-3.5 flex items-center space-x-3 bg-tg-blue/10 dark:bg-tg-blue/20 border-l-4 border-tg-blue cursor-pointer transition">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-tg-darkBlue to-tg-blue flex items-center justify-center text-white text-lg font-bold shadow-md">
+                                <i class="fas fa-users-rays"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-baseline mb-1">
+                                <h4 class="text-xs font-bold text-slate-800 dark:text-white truncate flex items-center gap-1">
+                                    Umumiy Muloqot Chati
+                                    <i class="fas fa-circle-check text-tg-blue text-[11px]"></i>
+                                </h4>
+                                <span class="text-[10px] text-slate-400" id="globalChatLastTime">Hozir</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate" id="globalChatPreview">Barcha foydalanuvchilar va Admin uchun ochiq chat</p>
+                        </div>
+                    </div>
+
+                    <!-- AI Assistant Chat -->
+                    <div class="p-3.5 flex items-center space-x-3 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer transition">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-lg font-bold">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-baseline mb-1">
+                                <h4 class="text-xs font-semibold text-slate-800 dark:text-white truncate">Telegram AI Yordamchi</h4>
+                                <span class="text-[10px] text-slate-400">Avto</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Savollaringiz bo'lsa yozib qoldiring...</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="md:col-span-8 flex flex-col bg-slate-100 dark:bg-tg-chatDark justify-between h-full relative">
+                
+                <!-- Chat Top Header -->
+                <div class="p-3.5 px-5 border-b border-slate-200 dark:border-tg-borderDark bg-white dark:bg-tg-panelDark flex items-center justify-between z-10 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-tg-darkBlue to-tg-blue flex items-center justify-center text-white text-base font-bold shadow-sm">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                Telegram Web Muloqot Xonasi
+                            </h3>
+                            <p class="text-[11px] text-slate-400"><span class="text-emerald-500 font-semibold">12 ta a'zo</span> • real-vaqt rejimida</p>
+                        </div>
+                    </div>
+
+                    <!-- Header Options -->
+                    <div class="flex items-center space-x-2 text-slate-400">
+                        <button onclick="exportChatHistory()" title="Chatni yuklab olish" class="p-2 hover:text-tg-blue hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition">
+                            <i class="fas fa-download text-sm"></i>
+                        </button>
+                        <button onclick="clearChatStream()" title="Chatni tozalash" class="p-2 hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition">
+                            <i class="fas fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Feed -->
+                <div id="messageStream" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
+                    <!-- Welcome Initial Message -->
+                    <div class="flex justify-center my-2">
+                        <span class="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-medium border border-slate-300 dark:border-slate-700/50">
+                            🔒 Barcha xabarlar xavfsiz va shifrlangan
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Message Input & Action Bar -->
+                <div class="p-3 sm:p-4 bg-white dark:bg-tg-panelDark border-t border-slate-200 dark:border-tg-borderDark">
+                    <form onsubmit="sendChatMessage(event)" class="flex items-center space-x-2">
+                        
+                        <!-- Attach simulation -->
+                        <button type="button" onclick="insertSampleLink()" title="Havola joylash" class="p-2.5 text-slate-400 hover:text-tg-blue hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition">
+                            <i class="fas fa-link text-base"></i>
+                        </button>
+
+                        <div class="flex-1 relative">
+                            <input type="text" id="chatInput" placeholder="Xabar yozing yoki havola (https://...) qoldiring..." required
+                                class="w-full py-3 px-4 bg-slate-100 dark:bg-tg-inputDark border border-slate-200 dark:border-tg-borderDark rounded-2xl text-xs sm:text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-tg-blue transition placeholder-slate-400">
+                        </div>
+
+                        <button type="submit" class="p-3 bg-gradient-to-r from-tg-darkBlue to-tg-blue hover:opacity-90 text-white rounded-2xl transition shadow-md shadow-tg-blue/30 flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-sm"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ================= EDIT PROFILE MODAL ================= -->
+    <div id="profileModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden fade-in">
+        <div class="bg-white dark:bg-tg-panelDark border border-slate-200 dark:border-tg-borderDark w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-tg-borderDark pb-3">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i class="fas fa-user-pen text-tg-blue"></i> Profilni Tahrirlash
+                </h3>
+                <button onclick="closeProfileModal()" class="text-slate-400 hover:text-white p-1">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Avatar Selector -->
+            <div class="text-center space-y-3">
+                <div class="relative w-20 h-20 mx-auto">
+                    <img id="editAvatarPreview" src="" class="w-20 h-20 rounded-3xl object-cover border-2 border-tg-blue shadow-md">
+                </div>
+                <p class="text-xs text-slate-400">Avatar uslubini tanlang:</p>
+                <div class="flex justify-center space-x-2" id="avatarPresets">
+                    <!-- Dynamic presets inserted by JS -->
+                </div>
+            </div>
+
+            <!-- Inputs -->
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Ismingiz</label>
+                    <input type="text" id="editNameInput" class="w-full py-2.5 px-3 bg-slate-100 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-tg-blue">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Bio / Status</label>
+                    <input type="text" id="editBioInput" placeholder="Masalan: Telegram Dasturchi" class="w-full py-2.5 px-3 bg-slate-100 dark:bg-tg-inputDark border border-slate-300 dark:border-tg-borderDark rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-tg-blue">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeProfileModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-400 hover:text-white">Bekor qilish</button>
+                <button onclick="saveProfileChanges()" class="px-5 py-2.5 rounded-xl bg-tg-blue hover:bg-tg-hover text-white text-xs font-bold shadow-md shadow-tg-blue/30">Saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ADMIN MANAGEMENT MODAL ================= -->
+    <div id="adminModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 hidden fade-in">
+        <div class="bg-white dark:bg-tg-panelDark border border-tg-gold/40 w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-5 max-h-[90vh] flex flex-col">
+            
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-tg-borderDark pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="p-2 rounded-xl bg-tg-gold/10 text-tg-gold text-lg">
+                        <i class="fas fa-shield-halved"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                            Admin Boshqaruv Markazi
+                        </h3>
+                        <p class="text-xs text-tg-gold font-medium">Bosh Administrator: jumaqulovbehruz831@gmail.com</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white p-1">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="p-3 bg-slate-100 dark:bg-tg-inputDark rounded-2xl border border-slate-200 dark:border-tg-borderDark">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">Foydalanuvchilar</p>
+                    <p id="statUserCount" class="text-xl font-black text-tg-blue mt-0.5">1</p>
+                </div>
+                <div class="p-3 bg-slate-100 dark:bg-tg-inputDark rounded-2xl border border-slate-200 dark:border-tg-borderDark">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">Jami Xabarlar</p>
+                    <p id="statMsgCount" class="text-xl font-black text-emerald-400 mt-0.5">0</p>
+                </div>
+                <div class="p-3 bg-slate-100 dark:bg-tg-inputDark rounded-2xl border border-slate-200 dark:border-tg-borderDark">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">Tizim Statusi</p>
+                    <p class="text-xs font-extrabold text-emerald-500 mt-2">FAOL / ALO</p>
+                </div>
+            </div>
+
+            <!-- Users List Table -->
+            <div class="flex-1 overflow-y-auto space-y-2">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ro'yxatdan o'tgan foydalanuvchilar</h4>
+                <div id="adminUsersList" class="space-y-2">
+                    <!-- Dynamic Users List -->
+                </div>
+            </div>
+
+            <div class="flex justify-end border-t border-slate-200 dark:border-tg-borderDark pt-3">
+                <button onclick="closeAdminModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700">Oynani Yopish</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        const ADMIN_EMAIL = "jumaqulovbehruz831@gmail.com";
+        
+        // App State
+        let currentUser = null;
+        let messages = [];
+        let registeredUsers = [];
+        let selectedAvatar = "https://api.dicebear.com/7.x/bottts/svg?seed=Admin";
+
+        // Initialization
+        window.onload = function() {
+            initTheme();
+            loadStateFromStorage();
+            renderMessages();
+        };
+
+        // Storage Controls
+        function loadStateFromStorage() {
+            const savedUsers = localStorage.getItem('tg_web_registered_users');
+            if (savedUsers) {
+                registeredUsers = JSON.parse(savedUsers);
+            } else {
+                // Pre-populate admin user
+                registeredUsers = [{
+                    name: "Behruz Jumaqulov",
+                    email: ADMIN_EMAIL,
+                    bio: "Bosh Administrator",
+                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Admin",
+                    isAdmin: true
+                }];
+                saveUsersToStorage();
+            }
+
+            const savedMsgs = localStorage.getItem('tg_web_messages');
+            if (savedMsgs) {
+                messages = JSON.parse(savedMsgs);
+            } else {
+                // Initial welcome message
+                messages = [{
+                    id: 1,
+                    senderName: "Telegram Bot",
+                    senderEmail: "bot@telegram.org",
+                    text: "Assalomu alaykum! Telegram Web platformsiga xush kelibsiz. Havolalarni yuborishingiz mumkin: https://t.me",
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    isAdmin: false,
+                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=TelegramBot"
+                }];
+                saveMsgsToStorage();
+            }
+
+            const savedLogged = localStorage.getItem('tg_web_current_user');
+            if (savedLogged) {
+                currentUser = JSON.parse(savedLogged);
+                openDashboard();
+            }
+        }
+
+        function saveUsersToStorage() {
+            localStorage.setItem('tg_web_registered_users', JSON.stringify(registeredUsers));
+        }
+
+        function saveMsgsToStorage() {
+            localStorage.setItem('tg_web_messages', JSON.stringify(messages));
+        }
+
+        function saveCurrentUserToStorage() {
+            localStorage.setItem('tg_web_current_user', JSON.stringify(currentUser));
+        }
+
+        // Theme Toggle Logic
+        function initTheme() {
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (document.documentElement.classList.contains('dark')) {
+                themeIcon.className = 'fas fa-sun text-yellow-400';
+            } else {
+                themeIcon.className = 'fas fa-moon text-slate-600';
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                    themeIcon.className = 'fas fa-moon text-slate-600';
+                } else {
+                    document.documentElement.classList.remove('light');
+                    document.documentElement.classList.add('dark');
+                    themeIcon.className = 'fas fa-sun text-yellow-400';
+                }
+            });
+        }
+
+        // Auth Tabs Switcher
+        function switchAuthMode(mode) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const forgotForm = document.getElementById('forgotForm');
+            const tabContainer = document.getElementById('tabContainer');
+            const tabLoginBtn = document.getElementById('tabLoginBtn');
+            const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+            const authTitle = document.getElementById('authTitle');
+            const authSubtitle = document.getElementById('authSubtitle');
+            const headerIcon = document.getElementById('headerIcon');
+
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            forgotForm.classList.add('hidden');
+
+            if (mode === 'login') {
+                tabContainer.classList.remove('hidden');
+                loginForm.classList.remove('hidden');
+                tabLoginBtn.className = "flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition duration-200 bg-white dark:bg-tg-panelDark text-tg-blue shadow-md";
+                tabRegisterBtn.className = "flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
+                authTitle.innerText = "Tizimga Kirish";
+                authSubtitle.innerText = "Telegram akkauntingizga email orqali kiring";
+                headerIcon.className = "fas fa-user-shield";
+            } else if (mode === 'register') {
+                tabContainer.classList.remove('hidden');
+                registerForm.classList.remove('hidden');
+                tabRegisterBtn.className = "flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition duration-200 bg-white dark:bg-tg-panelDark text-tg-blue shadow-md";
+                tabLoginBtn.className = "flex-1 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
+                authTitle.innerText = "Ro'yxatdan O'tish";
+                authSubtitle.innerText = "Yangi Telegram hisobini yaratish";
+                headerIcon.className = "fas fa-user-plus";
+            } else if (mode === 'forgot') {
+                tabContainer.classList.add('hidden');
+                forgotForm.classList.remove('hidden');
+                authTitle.innerText = "Parolni Tiklash";
+                authSubtitle.innerText = "Email manzilingizni kiriting";
+                headerIcon.className = "fas fa-key";
+            }
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash text-sm text-tg-blue';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye text-sm text-slate-400';
+            }
+        }
+
+        function checkPasswordStrength(pass) {
+            const bar = document.getElementById('strengthBar');
+            const text = document.getElementById('strengthText');
+            let s = 0;
+            if (pass.length >= 6) s++;
+            if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) s++;
+            if (pass.match(/\d/)) s++;
+            if (pass.match(/[^a-zA-Z\d]/)) s++;
+
+            if (!pass) {
+                bar.style.width = '0%'; text.innerText = '---';
+            } else if (s <= 1) {
+                bar.style.width = '33%'; bar.className = 'strength-bar h-full bg-red-500'; text.innerText = 'Kuchsiz'; text.className = 'font-semibold text-red-500';
+            } else if (s <= 3) {
+                bar.style.width = '66%'; bar.className = 'strength-bar h-full bg-amber-500'; text.innerText = "O'rta"; text.className = 'font-semibold text-amber-500';
+            } else {
+                bar.style.width = '100%'; bar.className = 'strength-bar h-full bg-emerald-500'; text.innerText = 'Kuchli'; text.className = 'font-semibold text-emerald-500';
+            }
+        }
+
+        // Login Handler
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!email || !password) {
+                showToast("Maydonlarni to'ldiring!", "error");
+                return;
+            }
+
+            const isAdmin = (email === ADMIN_EMAIL.toLowerCase());
+
+            // Find existing user or create on login
+            let existingUser = registeredUsers.find(u => u.email.toLowerCase() === email);
+            if (!existingUser) {
+                existingUser = {
+                    name: isAdmin ? "Behruz Jumaqulov (Admin)" : email.split('@')[0],
+                    email: email,
+                    bio: isAdmin ? "Bosh Administrator" : "Telegram Foydalanuvchi",
+                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${email}`,
+                    isAdmin: isAdmin
+                };
+                registeredUsers.push(existingUser);
+                saveUsersToStorage();
+            }
+
+            currentUser = existingUser;
+            saveCurrentUserToStorage();
+
+            if (isAdmin) {
+                showToast("Xush kelibsiz Administrator Behruz Jumaqulov!", "success");
+            } else {
+                showToast("Tizimga muvaffaqiyatli kirdingiz!");
+            }
+
+            openDashboard();
+        }
+
+        // Register Handler
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value.trim();
+
+            if (password.length < 6) {
+                showToast("Parol kamida 6 belgidan iborat bo'lsin!", "error");
+                return;
+            }
+
+            const isAdmin = (email === ADMIN_EMAIL.toLowerCase());
+
+            const newUser = {
+                name: name,
+                email: email,
+                bio: isAdmin ? "Bosh Administrator" : "Yangi a'zo",
+                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${name}`,
+                isAdmin: isAdmin
+            };
+
+            registeredUsers.push(newUser);
+            saveUsersToStorage();
+
+            currentUser = newUser;
+            saveCurrentUserToStorage();
+
+            showToast("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
+            openDashboard();
+        }
+
+        function handleForgot(e) {
+            e.preventDefault();
+            showToast("Tiklash havolasi email manzilingizga yuborildi!");
+            setTimeout(() => switchAuthMode('login'), 2000);
+        }
+
+        // Open Dashboard Interface
+        function openDashboard() {
+            document.getElementById('authContainer').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+
+            // Apply User Profile Data
+            document.getElementById('displayUserName').innerText = currentUser.name;
+            document.getElementById('displayUserBio').innerText = currentUser.bio || "Onlayn";
+            document.getElementById('userAvatarImg').src = currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.name}`;
+
+            const isAdminBadge = document.getElementById('isAdminBadge');
+            const adminCrownBadge = document.getElementById('adminCrownBadge');
+            const adminPanelBtn = document.getElementById('adminPanelBtn');
+
+            if (currentUser.isAdmin || currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                isAdminBadge.classList.remove('hidden');
+                adminCrownBadge.classList.remove('hidden');
+                adminPanelBtn.classList.remove('hidden');
+            } else {
+                isAdminBadge.classList.add('hidden');
+                adminCrownBadge.classList.add('hidden');
+                adminPanelBtn.classList.add('hidden');
+            }
+
+            renderMessages();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('tg_web_current_user');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('authContainer').classList.remove('hidden');
+            switchAuthMode('login');
+            showToast("Tizimdan chiqdingiz");
+        }
+
+        // ================= RICH MESSAGING SYSTEM =================
+        function sendChatMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const newMsg = {
+                id: Date.now(),
+                senderName: currentUser.name,
+                senderEmail: currentUser.email,
+                text: text,
+                time: timeStr,
+                isAdmin: currentUser.isAdmin || currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase(),
+                avatar: currentUser.avatar
+            };
+
+            messages.push(newMsg);
+            saveMsgsToStorage();
+            renderMessages();
+
+            input.value = '';
+
+            // Auto Bot Reply Simulation if requested
+            if (text.toLowerCase().includes('salom') || text.toLowerCase().includes('admin')) {
+                setTimeout(() => {
+                    const botMsg = {
+                        id: Date.now() + 1,
+                        senderName: "Telegram AI Bot",
+                        senderEmail: "bot@telegram.org",
+                        text: `Xabaringiz qabul qilindi, ${currentUser.name}! Savollaringiz bo'lsa javob berishga tayyormiz.`,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        isAdmin: false,
+                        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=TelegramBot"
+                    };
+                    messages.push(botMsg);
+                    saveMsgsToStorage();
+                    renderMessages();
+                }, 1000);
+            }
+        }
+
+        // Parses text for Links and renders Clickable Elements + Link Cards
+        function parseMessageText(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, function(url) {
+                return `
+                    <span class="block my-1.5 p-2 rounded-xl bg-black/20 border border-tg-blue/40">
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="text-tg-blue hover:underline font-bold flex items-center space-x-1.5 break-all">
+                            <i class="fas fa-external-link-alt text-xs"></i>
+                            <span>${url}</span>
+                        </a>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">Tashqi havolani ochish uchun bosing</span>
+                    </span>
+                `;
+            });
+        }
+
+        function renderMessages() {
+            const stream = document.getElementById('messageStream');
+            if (!stream) return;
+
+            // Clear stream except initial lock badge
+            stream.innerHTML = `
+                <div class="flex justify-center my-2">
+                    <span class="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-medium border border-slate-300 dark:border-slate-700/50">
+                        🔒 Barcha xabarlar xavfsiz va shifrlangan
+                    </span>
+                </div>
+            `;
+
+            messages.forEach(msg => {
+                const isMe = currentUser && (msg.senderEmail.toLowerCase() === currentUser.email.toLowerCase());
+                const formattedText = parseMessageText(escapeHTML(msg.text));
+
+                let adminBadgeHTML = '';
+                if (msg.isAdmin) {
+                    adminBadgeHTML = `
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black tracking-wide bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 uppercase shadow-sm ml-1">
+                            <i class="fas fa-crown text-[8px]"></i> ADMIN
+                        </span>
+                    `;
+                }
+
+                let messageHTML = '';
+
+                if (isMe) {
+                    // Outgoing Message (Me)
+                    messageHTML = `
+                        <div class="flex items-start justify-end space-x-2 my-2 fade-in">
+                            <div class="max-w-xs sm:max-w-md bg-tg-blue dark:bg-tg-msgOut text-white p-3.5 rounded-2xl rounded-tr-none shadow-md border ${msg.isAdmin ? 'border-amber-400/60' : 'border-transparent'}">
+                                <div class="flex items-center justify-between gap-2 mb-1">
+                                    <span class="text-xs font-bold text-cyan-200 flex items-center">
+                                        ${escapeHTML(msg.senderName)}
+                                        ${adminBadgeHTML}
+                                    </span>
+                                </div>
+                                <div class="text-xs sm:text-sm font-normal leading-relaxed">
+                                    ${formattedText}
+                                </div>
+                                <span class="text-[10px] text-white/70 block text-right mt-1.5 flex items-center justify-end space-x-1">
+                                    <span>${msg.time}</span>
+                                    <i class="fas fa-check-double text-[9px] text-cyan-300"></i>
+                                </span>
+                            </div>
+                            <img src="${msg.avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" class="w-8 h-8 rounded-xl object-cover bg-slate-800 border border-tg-blue/50">
+                        </div>
+                    `;
+                } else {
+                    // Incoming Message
+                    messageHTML = `
+                        <div class="flex items-start space-x-2 my-2 fade-in">
+                            <img src="${msg.avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=User'}" class="w-8 h-8 rounded-xl object-cover bg-slate-800 border border-slate-700">
+                            <div class="max-w-xs sm:max-w-md bg-white dark:bg-tg-msgIn text-slate-800 dark:text-slate-200 p-3.5 rounded-2xl rounded-tl-none shadow-md border ${msg.isAdmin ? 'border-amber-500/50' : 'border-slate-200 dark:border-slate-700/60'}">
+                                <div class="flex items-center justify-between gap-2 mb-1">
+                                    <span class="text-xs font-bold ${msg.isAdmin ? 'text-amber-400' : 'text-tg-blue'} flex items-center">
+                                        ${escapeHTML(msg.senderName)}
+                                        ${adminBadgeHTML}
+                                    </span>
+                                </div>
+                                <div class="text-xs sm:text-sm font-normal leading-relaxed">
+                                    ${formattedText}
+                                </div>
+                                <span class="text-[10px] text-slate-400 block text-right mt-1.5">${msg.time}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                stream.insertAdjacentHTML('beforeend', messageHTML);
+            });
+
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        // Quick Link Helper
+        function insertSampleLink() {
+            const input = document.getElementById('chatInput');
+            input.value = "https://t.me - Telegram rasmiy havolasi!";
+            input.focus();
+        }
+
+        function clearChatStream() {
+            if (confirm("Rostdan ham barcha chat tarixini tozalamoqchimisiz?")) {
+                messages = [];
+                saveMsgsToStorage();
+                renderMessages();
+                showToast("Chat tozalandi");
+            }
+        }
+
+        function exportChatHistory() {
+            let chatText = "=== TELEGRAM WEB CHAT TARIXI ===\n\n";
+            messages.forEach(m => {
+                chatText += `[${m.time}] ${m.senderName} (${m.senderEmail}): ${m.text}\n`;
+            });
+
+            const blob = new Blob([chatText], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Telegram_Chat_Tarixi_${Date.now()}.txt`;
+            a.click();
+            showToast("Chat tarixi yuklab olindi!");
+        }
+
+        function filterChats() {
+            const q = document.getElementById('chatSearchInput').value.toLowerCase();
+            const chats = document.querySelectorAll('#chatListStream > div');
+            chats.forEach(c => {
+                const text = c.innerText.toLowerCase();
+                c.style.display = text.includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        // ================= EDIT PROFILE MODAL =================
+        function openProfileModal() {
+            if (!currentUser) return;
+            document.getElementById('editNameInput').value = currentUser.name;
+            document.getElementById('editBioInput').value = currentUser.bio || '';
+            document.getElementById('editAvatarPreview').src = currentUser.avatar;
+
+            // Generate Presets
+            const presetsContainer = document.getElementById('avatarPresets');
+            presetsContainer.innerHTML = '';
+            const seeds = ['Behruz', 'Admin', 'Telegram', 'Alexander', 'Cyber'];
+            seeds.forEach(seed => {
+                const url = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = "w-10 h-10 rounded-xl bg-slate-800 border cursor-pointer hover:border-tg-blue transition p-0.5";
+                img.onclick = () => {
+                    selectedAvatar = url;
+                    document.getElementById('editAvatarPreview').src = url;
+                };
+                presetsContainer.appendChild(img);
+            });
+
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        function saveProfileChanges() {
+            const name = document.getElementById('editNameInput').value.trim();
+            const bio = document.getElementById('editBioInput').value.trim();
+
+            if (!name) {
+                showToast("Ism bo'sh bo'lishi mumkin emas!", "error");
+                return;
+            }
+
+            currentUser.name = name;
+            currentUser.bio = bio;
+            currentUser.avatar = document.getElementById('editAvatarPreview').src;
+
+            // Update registered users array
+            const idx = registeredUsers.findIndex(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+            if (idx !== -1) {
+                registeredUsers[idx] = currentUser;
+                saveUsersToStorage();
+            }
+
+            saveCurrentUserToStorage();
+            openDashboard();
+            closeProfileModal();
+            showToast("Profil tahrirlandi!");
+        }
+
+        // ================= ADMIN MODAL LOGIC =================
+        function openAdminModal() {
+            if (!currentUser || (!currentUser.isAdmin && currentUser.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase())) {
+                showToast("Sizda Admin huquqlari mavjud emas!", "error");
+                return;
+            }
+
+            document.getElementById('statUserCount').innerText = registeredUsers.length;
+            document.getElementById('statMsgCount').innerText = messages.length;
+
+            const list = document.getElementById('adminUsersList');
+            list.innerHTML = '';
+
+            registeredUsers.forEach((u, i) => {
+                const isAdmin = u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+                const item = `
+                    <div class="p-3 bg-slate-100 dark:bg-tg-inputDark rounded-2xl flex items-center justify-between border border-slate-200 dark:border-tg-borderDark">
+                        <div class="flex items-center space-x-3">
+                            <img src="${u.avatar}" class="w-9 h-9 rounded-xl object-cover bg-slate-800">
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1">
+                                    ${escapeHTML(u.name)}
+                                    ${isAdmin ? '<span class="text-[9px] bg-amber-500 text-black px-1 rounded font-black">ADMIN</span>' : ''}
+                                </h5>
+                                <p class="text-[10px] text-slate-400">${escapeHTML(u.email)}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg">Faol</span>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', item);
+            });
+
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        // Toast Helper
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.innerText = msg;
+
+            if (type === 'success') {
+                toastIcon.className = 'p-2 rounded-xl text-lg bg-emerald-500/20 text-emerald-400 fas fa-check-circle';
+                toast.className = 'fixed top-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 max-w-sm w-full p-4 rounded-2xl shadow-2xl flex items-center space-x-3 bg-slate-900 border border-emerald-500/40 text-white backdrop-blur-md';
+            } else {
+                toastIcon.className = 'p-2 rounded-xl text-lg bg-red-500/20 text-red-400 fas fa-exclamation-circle';
+                toast.className = 'fixed top-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 max-w-sm w-full p-4 rounded-2xl shadow-2xl flex items-center space-x-3 bg-slate-900 border border-red-500/40 text-white backdrop-blur-md';
+            }
+
+            setTimeout(hideToast, 4000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('-translate-y-24', 'opacity-0');
+            toast.classList.remove('translate-y-0', 'opacity-100');
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
